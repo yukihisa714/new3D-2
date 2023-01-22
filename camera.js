@@ -1,4 +1,4 @@
-import { Point, Vector, globalVertex, lines } from "./shape.js";
+import { Point, Vector, PlaneEquation, globalVertex, lines } from "./shape.js";
 import { key, sin, cos, tan, atan, calc3dLen } from "./utility.js";
 
 // カメラクラス
@@ -6,7 +6,7 @@ class Camera {
     constructor() {
 
         // カメラの座標
-        this.coord = new Point(0, 0, 0);
+        this.coord = new Point(0, -700, 0);
 
         // カメラの回転
         this.rotate = {
@@ -82,14 +82,7 @@ class Camera {
 
     // カメラ平面の方程式 ax+by+cz+d=0
     updatePlaneEquation() {
-        this.planeEquation = {
-            a: this.normalVector.vector.x,
-            b: this.normalVector.vector.y,
-            c: this.normalVector.vector.z,
-            d: this.normalVector.vector.x * -this.coord.x +
-                this.normalVector.vector.y * -this.coord.y +
-                this.normalVector.vector.z * -this.coord.z,
-        };
+        this.planeEquation = new PlaneEquation(this.normalVector, this.normalVector.ed);
     }
 
     update() {

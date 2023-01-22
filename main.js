@@ -1,7 +1,8 @@
 import { camera } from "./camera.js";
-import { key, sin, cos, tan, atan, calc3dLen } from "./utility.js";
+import { key, sin, cos, tan, atan, calc3dLen, calcIntersectionVtx } from "./utility.js";
 import { Point, Vector, Line, globalVertex, lines } from "./shape.js";
 
+console.log(atan(1));
 
 const can = camera.can;
 const con = camera.con;
@@ -48,17 +49,13 @@ function mainLoop() {
     for (let i = 0; i < globalVertex.length; i++) {
         const point = globalVertex[i];
         const length = calc3dLen(camera.coord, point);
-        const t = -(CPE.a * point.x + CPE.b * point.y + CPE.c * point.z + CPE.d)
-            / (CPE.a * CNV.x + CPE.b * CNV.y + CPE.c * CNV.z);
 
-        // カメラ平面との交点
-        intersectionVtx[i] = new Point(
-            CNV.x * t + point.x,
-            CNV.y * t + point.y,
-            CNV.z * t + point.z,
-        );
+        // 点からカメラ座標までのベクトル
+        const camToPointVector = new Vector(camera.coord, point).vector;
 
-        // con.fillText(intersectionVtx[i].x.toFixed(0) + ", " + intersectionVtx[i].y.toFixed(0) + ", " + intersectionVtx[i].z.toFixed(0), 10, i * 10 + 120);
+        // 交点の座標
+        // intersectionVtx[i] = calcIntersectionVtx(CNV, CPE, point);
+        intersectionVtx[i] = calcIntersectionVtx(camToPointVector, CPE, point);
 
         // 交点から点までのベクトル
         const intToPointVector = new Vector(intersectionVtx[i], point);
@@ -68,7 +65,7 @@ function mainLoop() {
 
         // 点がカメラの後ろにあるときに描画しない
         if (Math.sign(CNV.y) !== Math.sign(intToPointVector.vector.y)) {
-            continue;
+            // continue;
             isPointInFront = false;
         }
 
@@ -102,10 +99,12 @@ function mainLoop() {
 
         // 二次元座標に格納
         d2Vertex[i] = {
-            x: tmpIntVtx.x * 20 / Math.sqrt(length) + can.width / 2,
-            y: can.height - (tmpIntVtx.z * 20 / Math.sqrt(length) + can.height / 2),
+            // x: tmpIntVtx.x * 20 / Math.sqrt(length) + can.width / 2,
+            // y: can.height - (tmpIntVtx.z * 20 / Math.sqrt(length) + can.height / 2),
             // x: tmpIntVtx.x + can.width / 2,
             // y: can.height - (tmpIntVtx.z + can.height / 2),
+            x: atan(tmpIntVtx.x / camera.normalVectorLength) / 40 * can.width / 2 + can.width / 2,
+            y: can.height - (atan(tmpIntVtx.z / camera.normalVectorLength) / 40 * can.width / 2 + can.height / 2),
         };
 
         con.fillStyle = "black";
@@ -114,7 +113,7 @@ function mainLoop() {
 
 
         if (isPointInFront) {
-            if (globalVertex[i].isDraw) {
+            if (point.isDraw) {
                 con.beginPath();
                 con.arc(d2Vertex[i].x, d2Vertex[i].y, 5, 0, 360, false);
                 // con.fillText(i, d2Vertex[i].x + 5, d2Vertex[i].y + 5);
@@ -127,6 +126,8 @@ function mainLoop() {
         con.fillText(`dist: ${length.toFixed(0)}`, d2Vertex[i].x + 15, d2Vertex[i].y + 15);
 
 
+        con.fillText(`${~~intersectionVtx[i].x},${~~intersectionVtx[i].y},${~~intersectionVtx[i].z}`, 10, i * 10 + 120);
+        con.fillText(`${~~camToPointVector.x},${~~camToPointVector.y},${~~camToPointVector.z}`, 10, i * 10 + 260);
 
     }
 
@@ -164,7 +165,7 @@ function mainLoop() {
 
     con2.fillStyle = "red";
     con2.beginPath();
-    con2.arc(camera.coord.x / 8 + hc2, hc2 - camera.coord.y / 8, 5, 0, 360, false);
+    con2.arc(camera.coord.x / 8 + hc2, hc2 - camera.coord.y / 8, 3, 0, 360, false);
     con2.fill();
 
     con2.strokeStyle = "red";

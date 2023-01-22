@@ -78,6 +78,24 @@ export class Vector {
 }
 
 
+// 三次元平面
+export class PlaneEquation {
+    /**
+     * ax + by + cz + d = 0
+     * @param {Vector} normalVector 法線ベクトル
+     * @param {Point} point 法線ベクトルと平面の交点
+     */
+    constructor(normalVector, point) {
+        this.a = normalVector.vector.x;
+        this.b = normalVector.vector.y;
+        this.c = normalVector.vector.z;
+        this.d = normalVector.vector.x * -point.x +
+            normalVector.vector.y * -point.y +
+            normalVector.vector.z * -point.z;
+    }
+}
+
+
 export const globalVertex = [
     new Point(-200, 100, 200, true),
     new Point(200, 100, 200, true),
